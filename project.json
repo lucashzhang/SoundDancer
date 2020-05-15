@@ -1,0 +1,8 @@
+{
+    "type": "web",
+    "file": "index.html",
+    "description": "lmao",
+    "general": {
+        "supportsaudioprocessing" : true
+    }
+}
