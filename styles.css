@@ -7,13 +7,13 @@
 body {
     width: 100vw;
     height: 100vh;
-    background-image: url("assets/background.jpg");
+    background-image: url("assets/Plum Blossom.png");
     background-repeat: no-repeat;
     background-size: cover;
     background-position: center;
 }
 
-main {
+#canvas {
     width: 100vw;
     height: 100vh;
     background-color: transparent;
@@ -21,6 +21,8 @@ main {
 
 #overlay {
     position: fixed;
+    top: 0;
+    left: 0;
     width: 100vw;
     height: 100vh;
     background-color: transparent;
