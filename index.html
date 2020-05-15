@@ -100,7 +100,7 @@
 
                 // Just a helper function to make the code neater
                 function random(a, b) {
-                    const alpha = Math.random() * 0.5;
+                    const alpha = Math.random();
                     return a * (1.0 - alpha) + b * alpha;
                 }
 
@@ -171,7 +171,7 @@
                                         spring: random(0.02, 0.1),
                                         friction: random(0.7, 0.95),
                                         currVelocity: new Vec3(),
-                                        currOffset: new Vec3(random(0, 1) * 0.01)
+                                        currOffset: new Vec3(random(0, 1) * 0.005)
                                     };
 
                                     // Create an array of Vec3s (eg [[0, 0, 0], ...])
@@ -183,7 +183,7 @@
                                         vertex,
                                         uniforms: {
                                             uColor: { value: new Color(color) },
-                                            uThickness: { value: random(48, 64) }
+                                            uThickness: { value: random(32, 64) }
                                         }
                                     });
 
@@ -207,11 +207,10 @@
                 requestAnimationFrame(updateLines);
                 function updateLines(t) {
                     requestAnimationFrame(updateLines);
-                    const lastIntensity = intensity;
 
                     getIMax();
 
-                    if ((melMax < 0.00000001 && intensity < 0.00000001)) {
+                    if (melMax < 0.00000001 && intensity < 0.00000001) {
                         //If melMax and intensity is practically 0;
                         iMax = 0;
                     }
