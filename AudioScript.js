@@ -15,14 +15,14 @@
     const binGroup = 1 //Default at 1
     const numBins = Math.round(64 / binGroup); //The number of bins/buckets in the visualization
     const reverseLimit = 400; //ms between reverses
-    const melFactor = 4;
-    const bassFactor = 4;
+    const melFactor = 2;
+    const bassFactor = 1.3;
     const totalFactor = 2;
-    const melShrink = 0.69; //nice
-    const bassShrink = 0.69; //Nice
-    const totalShrink = 0.69; //NICE
+    const melShrink = 0.69;
+    const bassShrink = 0.69;
+    const totalShrink = 0.69;
 
-    const colors = ["#C43957", "#FF96AD", "#FF4A71", "#BF576E", "#CC3B5B"];
+    const colors = ["#C43957", "#FF96AD", "#FF4A71", "#BF576E", "#CC3B5B"]; //Default colors, if
     var length = 16;
     var numParticles = 2;
 
@@ -30,6 +30,7 @@
     var bassMax = 0;
     var iMax = 8;
     var flip = true;
+    var exposed = true;
     var lastFlipped = Date.now();
     var intensity = 0;
 
@@ -48,6 +49,7 @@
             if (properties.center_image) document.getElementById("center").src = `file:///${properties.center_image.value}`;
 
             if (properties.trail_count) numParticles = properties.trail_count.value;
+            if (properties.trail_length) length = properties.trail_length.value;
 
             if (properties.trail_color_1) colors[0] = getHex(properties.trail_color_1.value);
             if (properties.trail_color_2) colors[1] = getHex(properties.trail_color_2.value);
@@ -58,7 +60,7 @@
             //Removes the current canvas and then redraws with new parameters
             var node = document.getElementById("canvas");
             node.removeChild(node.firstChild);
-            drawCanvas();
+            drawCanvas()
         }
     }
 
@@ -129,92 +131,106 @@
 
             class Particle {
                 constructor(x, y, radian, colors) {
-                    this.x = x;
-                    this.y = y;
-                    this.arcRadius = window.innerHeight / 256;
-                    this.radians = radian;
-                    this.velocity = 0.05;
-                    this.particle = new Vec3();
-                    this.tmp = new Vec3();
-                    this.lines = [];
-                    this.colors = colors;
+                    this._originX = x;
+                    this._originY = y;
+                    this._x = x;
+                    this._y = y;
+                    this._arcRadius = window.innerHeight / 256;
+                    this._radians = radian;
+                    this._velocity = 0.01;
+                    this._particle = new Vec3();
+                    this._tmp = new Vec3();
+                    this._trails = [];
+                    this._colors = colors;
 
-                    this.update = (iMax, intensity) => {
-                        this.arcRadius = window.innerHeight / 256 + Math.round((7 * this.arcRadius + iMax * window.innerHeight / 128) / 8);
-                        this.velocity = flip ? 0.01 + Math.sqrt(intensity) / 48 : -(0.01 + Math.sqrt(intensity) / 48);
-                        this.radians += this.velocity;
-                        this.x = x + this.arcRadius * Math.cos(this.radians);
-                        this.y = y + this.arcRadius * Math.sin(this.radians);
-                        this.particle.set(
-                            (this.x / gl.renderer.width) * 2 - 1,
-                            (this.y / gl.renderer.height) * -2 + 1,
-                            0
-                        );
-                        this.draw();
-                    };
-                    this.draw = _ => {
-                        this.lines.forEach(line => {
-                            // Update polyline input points
-                            for (let i = line.points.length - 1; i >= 0; i--) {
-                                if (!i) {
-                                    // For the first point, spring ease it to the mouse position
-                                    this.tmp
-                                        .copy(this.particle)
-                                        .add(line.currOffset)
-                                        .sub(line.points[i])
-                                        .multiply(line.spring);
-                                    line.currVelocity.add(this.tmp).multiply(line.friction);
-                                    line.points[i].add(line.currVelocity);
-                                } else {
-                                    // The rest of the points ease to the point in front of them, making a line
-                                    line.points[i].lerp(line.points[i - 1], 0.9);
+                }
+                updateParticle(iMax, intensity) {
+                    //Update all fields related to particle
+                    this._arcRadius = window.innerHeight / 256 + Math.round((7 * this._arcRadius + iMax * window.innerHeight / 128) / 8);
+                    this._velocity = flip ? 0.01 + Math.sqrt(intensity) / 48 : -(0.01 + Math.sqrt(intensity) / 48);
+                    this._radians += this._velocity;
+                    this._x = this._originX + this._arcRadius * Math.cos(this._radians);
+                    this._y = this._originY + this._arcRadius * Math.sin(this._radians);
+                    this._particle.set(
+                        (this._x / gl.renderer.width) * 2 - 1,
+                        (this._y / gl.renderer.height) * -2 + 1,
+                        0
+                    );
+                    this.drawParticle();
+                }
+                drawParticle() {
+                    this._trails.forEach(line => {
+                        // Update polyline input points
+                        for (let i = line.points.length - 1; i >= 0; i--) {
+                            if (!i) {
+                                // For the first point, spring ease it to the mouse position
+                                this._tmp
+                                    .copy(this._particle)
+                                    .add(line.currOffset)
+                                    .sub(line.points[i])
+                                    .multiply(line.spring);
+                                line.currVelocity.add(this._tmp).multiply(line.friction);
+                                line.points[i].add(line.currVelocity);
+                            } else {
+                                // The rest of the points ease to the point in front of them, making a line
+                                line.points[i].lerp(line.points[i - 1], 0.9);
+                            }
+                        }
+                        line.polyline.updateGeometry();
+                    });
+                }
+                initTrails(springs, frictions) {
+                    //Shuffle the springs and frictions
+                    shuffleArray(springs);
+                    shuffleArray(frictions);
+                    //Init a line for each color
+                    this._colors.forEach(
+                        (color, i) => {
+                            // Store a few values for each lines' randomised spring movement
+                            const line = {
+                                spring: springs[i],
+                                friction: frictions[i],
+                                currVelocity: new Vec3(),
+                                currOffset: new Vec3(random(0, 0.08) * 0.005, random(0, 0.08) * 0.005, 0)
+                            };
+
+                            // Create an array of Vec3s (eg [[0, 0, 0], ...])
+                            const points = (line.points = []);
+                            for (let i = 0; i < length; i++) points.push(new Vec3());
+
+                            line.polyline = new Polyline(gl, {
+                                points,
+                                vertex,
+                                uniforms: {
+                                    uColor: { value: new Color(color) },
+                                    uThickness: { value: random(window.innerHeight / 30, window.innerHeight / 20) }
                                 }
-                            }
-                            line.polyline.updateGeometry();
-                        });
-                    };
+                            });
 
-                    this.initLines = (springs, frictions) => {
-                        //Shuffle the springs and frictions
-                        shuffleArray(springs);
-                        shuffleArray(frictions);
-                        //Init a line for each color
-                        this.colors.forEach(
-                            (color, i) => {
-                                // Store a few values for each lines' randomised spring movement
-                                const line = {
-                                    spring: springs[i],
-                                    friction: frictions[i],
-                                    currVelocity: new Vec3(),
-                                    currOffset: new Vec3(random(0, 0.08) * 0.005, random(0, 0.08) * 0.005, 0)
-                                };
+                            line.polyline.mesh.setParent(scene);
 
-                                // Create an array of Vec3s (eg [[0, 0, 0], ...])
-                                const points = (line.points = []);
-                                for (let i = 0; i < length; i++) points.push(new Vec3());
+                            this._trails.push(line);
+                        }
+                    );
+                }
+                resizeTrails() {
+                    renderer.setSize(window.innerWidth, window.innerHeight);
 
-                                line.polyline = new Polyline(gl, {
-                                    points,
-                                    vertex,
-                                    uniforms: {
-                                        uColor: { value: new Color(color) },
-                                        uThickness: { value: random(window.innerHeight / 30, window.innerHeight / 20) }
-                                    }
-                                });
+                    // We call resize on the polylines to update their resolution uniforms
+                    this._trails.forEach(line => line.polyline.resize());
+                }
 
-                                line.polyline.mesh.setParent(scene);
-
-                                this.lines.push(line);
-                            }
-                        );
+                get isParticleCentered() {
+                    if (this._arcRadius / (window.innerHeight / 256) < 9) return true;
+                    return false;
+                }
+                get isTrailCentered() {
+                    for (var i = 1; i < length; i++) {
+                        let x = this._trails[0].points[i][0] - this._trails[0].points[i - 1][0];
+                        let y = this._trails[0].points[i][1] - this._trails[0].points[i - 1][1];
+                        if (Math.sqrt(x * x + y * y) > 0.00045) return false;
                     }
-
-                    this.resizeLine = _ => {
-                        renderer.setSize(window.innerWidth, window.innerHeight);
-
-                        // We call resize on the polylines to update their resolution uniforms
-                        this.lines.forEach(line => line.polyline.resize());
-                    }
+                    return true;
                 }
             }
 
@@ -231,73 +247,78 @@
             const radIncrement = 2 / numParticles;
             for (var i = 0; i < numParticles; i++) {
                 var newParticle = new Particle(window.innerWidth / 2, window.innerHeight / 2, Math.PI * i * radIncrement, colors);
-                newParticle.initLines(springs, frictions);
-                newParticle.resizeLine();
-                window.addEventListener("resize", newParticle.resizeLine(), false);
+                newParticle.initTrails(springs, frictions);
+                newParticle.resizeTrails();
+                window.addEventListener("resize", newParticle.resizeTrails(), false);
                 particles.push(newParticle);
             }
 
-            requestAnimationFrame(updateLines);
+            requestAnimationFrame(updateLines)
             function updateLines(t) {
                 requestAnimationFrame(updateLines);
-
                 getIMax();
 
                 if (melMax < 0.00000001 && intensity < 0.00000001) {
                     //If melMax and intensity is practically 0;
                     iMax = 0;
+                    if (exposed && particles[0].isTrailCentered) {
+                        exposed = false
+                        document.getElementById("canvas").style.display = "none"
+                    }
+                } else {
+                    exposed = true;
+                    if (document.getElementById("canvas").style.display == "none") {
+                        document.getElementById("canvas").style.display = "block"
+                    }
                 }
 
-                particles.forEach(particle => {
-                    particle.update(iMax, intensity);
+                if (exposed) particles.forEach(particle => {
+                    particle.updateParticle(iMax, intensity);
                 })
                 renderer.render({ scene });
-                // gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
             }
         }
         window.wallpaperRegisterAudioListener(listener);
-
-        //Code to determine the melody and when to flip
-        const getIMax = _ => {
-            var currIntensity = 0;
-            var bassIntensity = 0;
-
-            for (var i = 0; i < audio.length / 2; ++i) {
-
-                var currTotal = audio[i] + audio[i + audio.length / 2];
-                if (i >= numBins / 3 && currTotal >= melMax * melFactor) {
-                    iMax = i;
-                    melMax = currTotal;
-                } else if (i < numBins / 4) {
-                    bassIntensity += currTotal;
-                }
-                currIntensity += currTotal;
-            }
-            if (this.Date.now() - lastFlipped >= reverseLimit
-                && bassIntensity > bassMax * 1.3
-                && bassIntensity > numBins / 32) {
-                if (currIntensity > intensity * totalFactor) {
-                    flip = !flip;
-                    lastFlipped = this.Date.now();
-                    bassMax = bassIntensity;
-                    intensity = currIntensity;
-                } else if (currIntensity >= intensity) {
-                    intensity = currIntensity;
-                }
-            } else if (bassIntensity >= bassMax && bassIntensity <= bassMax * 1.3) {
-                bassMax = bassIntensity;
-            }
-
-            melMax *= melShrink;
-            bassMax *= bassShrink;
-            if (currIntensity < intensity) {
-                intensity *= totalShrink;
-            }
-            iMax = Math.floor(iMax / binGroup);
-        }
     }
 
+    //Code to determine the melody and when to flip
+    function getIMax() {
+        var currIntensity = 0;
+        var bassIntensity = 0;
 
+        for (var i = 0; i < audio.length / 2; ++i) {
+
+            var currTotal = audio[i] + audio[i + audio.length / 2];
+            if (i >= numBins / 3 && currTotal >= melMax * melFactor) {
+                if (exposed) iMax = i;
+                melMax = currTotal;
+            } else if (i < numBins / 4) {
+                bassIntensity += currTotal;
+            }
+            currIntensity += currTotal;
+        }
+        if (this.Date.now() - lastFlipped >= reverseLimit
+            && bassIntensity > bassMax * bassFactor
+            && bassIntensity > numBins / 32) {
+            if (currIntensity > intensity * totalFactor) {
+                flip = !flip;
+                lastFlipped = this.Date.now();
+                bassMax = bassIntensity;
+                intensity = currIntensity;
+            } else if (currIntensity >= intensity) {
+                intensity = currIntensity;
+            }
+        } else if (bassIntensity >= bassMax && bassIntensity <= bassMax * 1.3) {
+            bassMax = bassIntensity;
+        }
+
+        melMax *= melShrink;
+        bassMax *= bassShrink;
+        if (currIntensity < intensity) {
+            intensity *= totalShrink;
+        }
+        iMax = Math.floor(iMax / binGroup);
+    }
 
     //Help shuffle the array
     function shuffleArray(array) {
