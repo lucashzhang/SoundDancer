@@ -1,8 +1,111 @@
 {
     "type": "web",
+    "title": "AudioDancer",
     "file": "index.html",
     "description": "lmao",
     "general": {
-        "supportsaudioprocessing" : true
+        "supportsaudioprocessing": true,
+        "properties": {
+            "background_title": {
+                "text": "<h4>Background</h4>",
+                "type": "text",
+                "order": 100
+            },
+            "background_color": {
+                "text": "Background Color",
+                "type": "color",
+                "value": "0 0 0",
+                "order": 101
+            },
+            "background_image": {
+                "fileType": "image",
+                "text": "Background Image",
+                "type": "file",
+                "value": "",
+                "order": 102
+            },
+            "background_image_size": {
+                "options": [
+                    {
+                        "label": "Contain",
+                        "value": "contain"
+                    },
+                    {
+                        "label": "Cover",
+                        "value": "Cover"
+                    }
+                ],
+                "text": "Background Image Size",
+                "type": "combo",
+                "value": "contain",
+                "order": 103
+            },
+            "repeat_background": {
+                "text": "Repeat Background",
+                "type": "bool",
+                "value": false,
+                "order": 104
+            },
+            "center_title": {
+                "text": "<h4>Center Image</h4>",
+                "type": "text",
+                "order": 105
+            },
+            "center_image": {
+                "fileType": "image",
+                "text": "Center Image",
+                "type": "file",
+                "value": "",
+                "order": 106
+            },
+            "trail_title": {
+                "text": "<h4>Audio Trails</h4>",
+                "type": "text",
+                "order": 107
+            },
+            "trail_note": {
+                "text": "IMPORTANT: Reload to update trails",
+                "type": "text",
+                "order": 108
+            },
+            "trail_count": {
+                "text": "Number of Trails",
+                "type": "slider",
+                "value": 2,
+                "min": 1,
+                "max": 5,
+                "order": 109
+            },
+            "trail_color_1": {
+                "text": "Trail Color 1",
+                "type": "color",
+                "value": "0 0 0",
+                "order": 111
+            },
+            "trail_color_2": {
+                "text": "Trail Color 2",
+                "type": "color",
+                "value": "0 0 0",
+                "order": 112
+            },
+            "trail_color_3": {
+                "text": "Trail Color 3",
+                "type": "color",
+                "value": "0 0 0",
+                "order": 113
+            },
+            "trail_color_4": {
+                "text": "Trail Color 4",
+                "type": "color",
+                "value": "0 0 0",
+                "order": 114
+            },
+            "trail_color_5": {
+                "text": "Trail Color 5",
+                "type": "color",
+                "value": "0 0 0",
+                "order": 115
+            }
+        }
     }
 }

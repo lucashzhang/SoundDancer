@@ -1,17 +1,5 @@
 //Self-Executing Anonymous Function for closure
-(async function audioClosure() {
-    let {
-        Polyline,
-        Renderer,
-        Transform,
-        Geometry,
-        Program,
-        Mesh,
-        Vec3,
-        Vec2,
-        Color
-    } = await import("https://cdn.jsdelivr.net/npm/ogl@0.0.32/dist/ogl.mjs")
-
+(function() {
     const binGroup = 1 //Default at 1
     const numBins = Math.round(64 / binGroup); //The number of bins/buckets in the visualization
     const reverseLimit = 400; //ms between reverses
@@ -66,7 +54,19 @@
     // Code required to draw
     window.onload = drawCanvas();
 
-    function drawCanvas() {
+    async function drawCanvas() {
+        let {
+            Polyline,
+            Renderer,
+            Transform,
+            Geometry,
+            Program,
+            Mesh,
+            Vec3,
+            Vec2,
+            Color
+        } = await import("https://cdn.jsdelivr.net/npm/ogl@0.0.32/dist/ogl.mjs")
+
 
         //By help, I mean mostly this part that I don't completely understand, something something vector calculus
         const vertex = `
