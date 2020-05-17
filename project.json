@@ -9,20 +9,20 @@
             "background_title": {
                 "text": "<h4>Background</h4>",
                 "type": "text",
-                "order": 100
+                "order": 99
             },
             "background_color": {
                 "text": "Background Color",
                 "type": "color",
-                "value": "0 0 0",
-                "order": 101
+                "value": "255 255 255",
+                "order": 100
             },
             "background_image": {
                 "fileType": "image",
                 "text": "Background Image",
                 "type": "file",
                 "value": "",
-                "order": 102
+                "order": 101
             },
             "background_image_size": {
                 "options": [
@@ -38,30 +38,64 @@
                 "text": "Background Image Size",
                 "type": "combo",
                 "value": "contain",
-                "order": 103
+                "order": 102
             },
             "repeat_background": {
                 "text": "Repeat Background",
                 "type": "bool",
                 "value": false,
+                "order": 103
+            },
+            "overlay_title": {
+                "text": "<h4>Overlay Image</h4>",
+                "type": "text",
                 "order": 104
+            },
+            "overlay_image": {
+                "fileType": "image",
+                "text": "Overlay Image",
+                "type": "file",
+                "value": "",
+                "order": 105
+            },
+            "overlay_image_size": {
+                "options": [
+                    {
+                        "label": "Contain",
+                        "value": "contain"
+                    },
+                    {
+                        "label": "Cover",
+                        "value": "Cover"
+                    }
+                ],
+                "text": "Overlay Image Size",
+                "type": "combo",
+                "value": "contain",
+                "order": 106
+            },
+            "repeat_overlay": {
+                "text": "Repeat Overlay",
+                "type": "bool",
+                "value": false,
+                "order": 107
             },
             "center_title": {
                 "text": "<h4>Center Image</h4>",
                 "type": "text",
-                "order": 105
+                "order": 108
             },
             "center_image": {
                 "fileType": "image",
                 "text": "Center Image",
                 "type": "file",
                 "value": "",
-                "order": 106
+                "order": 109
             },
             "trail_title": {
                 "text": "<h4>Audio Trails</h4>",
                 "type": "text",
-                "order": 107
+                "order": 110
             },
             "trail_count": {
                 "text": "Number of Trails",
@@ -69,7 +103,7 @@
                 "value": 2,
                 "min": 1,
                 "max": 8,
-                "order": 108
+                "order": 111
             },
             "trail_length": {
                 "text": "Length of Trails",
@@ -77,37 +111,37 @@
                 "value": 16,
                 "min": 5,
                 "max": 20,
-                "order": 109
+                "order": 112
             },
             "trail_color_1": {
                 "text": "Trail Color 1",
                 "type": "color",
                 "value": "0 0 0",
-                "order": 111
+                "order": 113
             },
             "trail_color_2": {
                 "text": "Trail Color 2",
                 "type": "color",
                 "value": "0 0 0",
-                "order": 112
+                "order": 114
             },
             "trail_color_3": {
                 "text": "Trail Color 3",
                 "type": "color",
                 "value": "0 0 0",
-                "order": 113
+                "order": 115
             },
             "trail_color_4": {
                 "text": "Trail Color 4",
                 "type": "color",
                 "value": "0 0 0",
-                "order": 114
+                "order": 116
             },
             "trail_color_5": {
                 "text": "Trail Color 5",
                 "type": "color",
                 "value": "0 0 0",
-                "order": 115
+                "order": 117
             }
         }
     }

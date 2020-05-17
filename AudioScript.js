@@ -31,6 +31,7 @@
     var iMax = 8;
     var flip = true;
     var exposed = true;
+    var stopRunning = false;
     var lastFlipped = Date.now();
     var intensity = 0;
 
@@ -48,6 +49,10 @@
 
             if (properties.center_image) document.getElementById("center").src = `file:///${properties.center_image.value}`;
 
+            if (properties.overlay_image) document.getElementById("overlay").style.backgroundImage = `url("file:///${properties.overlay_image.value}")`;
+            if (properties.repeat_overlay) document.getElementById("overlay").style.backgroundRepeat = properties.repeat_overlay.value ? "repeat" : "no-repeat";
+            if (properties.overlay_image_size) document.getElementById("overlay").style.backgroundSize = properties.overlay_image_size.value;
+
             if (properties.trail_count) numParticles = properties.trail_count.value;
             if (properties.trail_length) length = properties.trail_length.value;
 
@@ -58,8 +63,10 @@
             if (properties.trail_color_5) colors[4] = getHex(properties.trail_color_5.value);
 
             //Removes the current canvas and then redraws with new parameters
+            stopRunning = true;
             var node = document.getElementById("canvas");
             node.removeChild(node.firstChild);
+            stopRunning = false;
             drawCanvas()
         }
     }
@@ -191,7 +198,7 @@
                                 spring: springs[i],
                                 friction: frictions[i],
                                 currVelocity: new Vec3(),
-                                currOffset: new Vec3(random(0, 0.08) * 0.005, random(0, 0.08) * 0.005, 0)
+                                currOffset: new Vec3(random(0, 0.05) * 0.005, random(0, 0.05) * 0.005, 0)
                             };
 
                             // Create an array of Vec3s (eg [[0, 0, 0], ...])
@@ -220,15 +227,11 @@
                     this._trails.forEach(line => line.polyline.resize());
                 }
 
-                get isParticleCentered() {
-                    if (this._arcRadius / (window.innerHeight / 256) < 9) return true;
-                    return false;
-                }
                 get isTrailCentered() {
                     for (var i = 1; i < length; i++) {
                         let x = this._trails[0].points[i][0] - this._trails[0].points[i - 1][0];
                         let y = this._trails[0].points[i][1] - this._trails[0].points[i - 1][1];
-                        if (Math.sqrt(x * x + y * y) > 0.00045) return false;
+                        if (Math.sqrt(x * x + y * y) > 0.00044) return false;
                     }
                     return true;
                 }
@@ -276,6 +279,7 @@
                     particle.updateParticle(iMax, intensity);
                 })
                 renderer.render({ scene });
+                if (stopRunning) return;
             }
         }
         window.wallpaperRegisterAudioListener(listener);
