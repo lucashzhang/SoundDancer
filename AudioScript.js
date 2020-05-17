@@ -64,6 +64,9 @@
 
             //Removes the current canvas and then redraws with new parameters
             stopRunning = true;
+            melMax = 0;
+            intensity = 0;
+            audio = [];
             var node = document.getElementById("canvas");
             node.removeChild(node.firstChild);
             stopRunning = false;
