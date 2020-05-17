@@ -258,7 +258,7 @@
 
             requestAnimationFrame(updateLines)
             function updateLines(t) {
-                requestAnimationFrame(updateLines);
+                if (!stopRunning) requestAnimationFrame(updateLines);
                 getIMax();
 
                 if (melMax < 0.00000001 && intensity < 0.00000001) {
@@ -279,7 +279,6 @@
                     particle.updateParticle(iMax, intensity);
                 })
                 renderer.render({ scene });
-                if (stopRunning) return;
             }
         }
         window.wallpaperRegisterAudioListener(listener);
