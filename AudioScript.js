@@ -1,5 +1,6 @@
 //Self-Executing Anonymous Function for closure
 (async function audioClosure() {
+    //Imports for ogl drawing
     let {
         Polyline,
         Renderer,
@@ -11,7 +12,8 @@
         Vec2,
         Color
     } = await import("https://cdn.jsdelivr.net/npm/ogl@0.0.32/dist/ogl.mjs")
-
+    //Constants for audio responsiveness
+    //The Wallpaper Engine's audio listener returns an array of 128, 64 for left channel, 64 for right channel
     const binGroup = 1 //Default at 1
     const numBins = Math.round(64 / binGroup); //The number of bins/buckets in the visualization
     const reverseLimit = 400; //ms between reverses
@@ -21,20 +23,20 @@
     const melShrink = 0.69;
     const bassShrink = 0.69;
     const totalShrink = 0.69;
-
-    const colors = ["#C43957", "#FF96AD", "#FF4A71", "#BF576E", "#CC3B5B"]; //Default colors, if
+    //Default charactersitics for creating particles
+    const colors = ["#C43957", "#FF96AD", "#FF4A71", "#BF576E", "#CC3B5B"];
     var length = 16;
     var numParticles = 2;
-
-    var melMax = 0;
-    var bassMax = 0;
-    var iMax = 8;
-    var flip = true;
-    var exposed = true;
-    var stopRunning = false;
-    var lastFlipped = Date.now();
-    var intensity = 0;
-
+    //Updated by getIMax() or user interaction
+    var melMax = 0; //Intensity of melody
+    var bassMax = 0; //Intensity of bass (IMPORTANT: not on same scale as melMax, cannot be compared)
+    var intensity = 0; //Overall Intensity of the sound
+    var iMax = 8; //Where the melody is
+    var flip = true; //Flips direction of motion
+    var lastFlipped = Date.now(); //Last time the direction has been flipped
+    var stopDrawing = false; //Triggers exit condition of animation
+    var exposed = true; //Whether or not the particles should be hidden
+    //Creates array and listener for Wallpaper Engine's built in audio listener
     let audio = [];
     const listener = arr => {
         audio = arr;
@@ -42,6 +44,7 @@
 
     window.wallpaperPropertyListener = {
         applyUserProperties: function (properties) {
+            //Apply updates to the wallpaper through Wallpaper Engine's UI. Read from returned JSON
             if (properties.background_image) document.body.style.backgroundImage = `url("file:///${properties.background_image.value}")`;
             if (properties.repeat_background) document.body.style.backgroundRepeat = properties.repeat_background.value ? "repeat" : "no-repeat";
             if (properties.background_image_size) document.body.style.backgroundSize = properties.background_image_size.value;
@@ -63,14 +66,20 @@
             if (properties.trail_color_5) colors[4] = getHex(properties.trail_color_5.value);
 
             //Removes the current canvas and then redraws with new parameters
-            stopRunning = true;
-            melMax = 0;
-            intensity = 0;
-            audio = [];
-            var node = document.getElementById("canvas");
-            node.removeChild(node.firstChild);
-            stopRunning = false;
-            drawCanvas()
+            //Stops the current animation
+            stopDrawing = true;
+            //Pushes reset to execute after the current animation has been stopped
+            window.setTimeout(() => {
+                //Clears audio array
+                audio = [];
+                //Resets values
+                melMax = 0;
+                intensity = 0;
+                //Replaces canvas
+                var node = document.getElementById("canvas");
+                node.removeChild(node.firstChild);
+                drawCanvas();
+            }, 100);
         }
     }
 
@@ -80,7 +89,7 @@
 
     function drawCanvas() {
 
-        //By help, I mean mostly this part that I don't completely understand, something something vector calculus
+        //Something something vector calculus
         const vertex = `
                 attribute vec3 position;
     attribute vec3 next;
@@ -120,6 +129,7 @@
 `;
 
         {
+            //Creates new renderer, this one supports transparent canvases
             const renderer = new Renderer({
                 dpr: 2, transparent: true, alpha: true,
                 premultiplyAlpha: false
@@ -129,16 +139,13 @@
 
             const scene = new Transform();
 
-            // Just a helper function to make the code neater
+            // Random number generator within range
             function random(a, b) {
                 const alpha = Math.random();
                 return a * (1.0 - alpha) + b * alpha;
             }
 
-            // We're going to make a number of different coloured lines for fun.
-
-            // Call initial resize after creating the polylines
-
+            //Particle object that holds all code for a "particle" to be animated across the screen
             class Particle {
                 constructor(x, y, radian, colors) {
                     this._originX = x;
@@ -159,6 +166,7 @@
                     this._arcRadius = window.innerHeight / 256 + Math.round((7 * this._arcRadius + iMax * window.innerHeight / 128) / 8);
                     this._velocity = flip ? 0.01 + Math.sqrt(intensity) / 48 : -(0.01 + Math.sqrt(intensity) / 48);
                     this._radians += this._velocity;
+                    //The particle moves in a circular motion
                     this._x = this._originX + this._arcRadius * Math.cos(this._radians);
                     this._y = this._originY + this._arcRadius * Math.sin(this._radians);
                     this._particle.set(
@@ -190,24 +198,23 @@
                     });
                 }
                 initTrails(springs, frictions) {
-                    //Shuffle the springs and frictions
+                    //Shuffle the springs and frictions so while on entire group shares the same characteristics, the individual lines are different
                     shuffleArray(springs);
                     shuffleArray(frictions);
                     //Init a line for each color
                     this._colors.forEach(
                         (color, i) => {
-                            // Store a few values for each lines' randomised spring movement
+                            // Assign randomized spring and friction values. Also create random offsets in xy plane
                             const line = {
                                 spring: springs[i],
                                 friction: frictions[i],
                                 currVelocity: new Vec3(),
                                 currOffset: new Vec3(random(0, 0.05) * 0.005, random(0, 0.05) * 0.005, 0)
                             };
-
-                            // Create an array of Vec3s (eg [[0, 0, 0], ...])
+                            // Creates an array of Vec3s (eg [[0, 0, 0], ...])
                             const points = (line.points = []);
                             for (let i = 0; i < length; i++) points.push(new Vec3());
-
+                            //Creates line with a random thickness
                             line.polyline = new Polyline(gl, {
                                 points,
                                 vertex,
@@ -225,12 +232,13 @@
                 }
                 resizeTrails() {
                     renderer.setSize(window.innerWidth, window.innerHeight);
-
-                    // We call resize on the polylines to update their resolution uniforms
+                    //Resize the polylines to update their resolution uniforms
                     this._trails.forEach(line => line.polyline.resize());
                 }
 
                 get isTrailCentered() {
+                    //Returns whether the first polyline trail is bunched together
+                    //True if together, false if not
                     for (var i = 1; i < length; i++) {
                         let x = this._trails[0].points[i][0] - this._trails[0].points[i - 1][0];
                         let y = this._trails[0].points[i][1] - this._trails[0].points[i - 1][1];
@@ -241,7 +249,7 @@
             }
 
             //Init everything
-            //Init a bunch of random springs and frictions to be shared with the
+            //Init a bunch of random springs and frictions to be shared between all particles
             const springs = [];
             const frictions = [];
             for (var i = 0; i < colors.length; i++) {
@@ -249,6 +257,7 @@
                 frictions.push(random(0.8, 0.95));
             }
 
+            //Initializes particles spaced evenly in the circle
             const particles = [];
             const radIncrement = 2 / numParticles;
             for (var i = 0; i < numParticles; i++) {
@@ -259,31 +268,39 @@
                 particles.push(newParticle);
             }
 
+            //Makes sure drawing is allowed before starting
+            stopDrawing = false;
             requestAnimationFrame(updateLines)
             function updateLines(t) {
-                if (!stopRunning) requestAnimationFrame(updateLines);
+                //Allows for animation to stop so that the canvas can be replaced without issues
+                if (!stopDrawing) requestAnimationFrame(updateLines);
+                else return;
+                //Returns the location of the melody as an index location
                 getIMax();
 
                 if (melMax < 0.00000001 && intensity < 0.00000001) {
                     //If melMax and intensity is practically 0;
                     iMax = 0;
                     if (exposed && particles[0].isTrailCentered) {
+                        //When the trail becomes small, hide the canvas
                         exposed = false
                         document.getElementById("canvas").style.display = "none"
                     }
                 } else {
+                    //Reset when the sound comes back
                     exposed = true;
                     if (document.getElementById("canvas").style.display == "none") {
                         document.getElementById("canvas").style.display = "block"
                     }
                 }
-
+                //If the particles are supposed to be exposed, update animation, otherwise stop animating
                 if (exposed) particles.forEach(particle => {
                     particle.updateParticle(iMax, intensity);
                 })
                 renderer.render({ scene });
             }
         }
+        //Listener for the sound required for the reponsiveness
         window.wallpaperRegisterAudioListener(listener);
     }
 
