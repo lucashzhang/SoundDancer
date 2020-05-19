@@ -69,7 +69,7 @@
             //Stops the current animation
             stopDrawing = true;
             //Pushes reset to execute after the current animation has been stopped
-            window.setTimeout(() => {
+            setTimeout(() => {
                 //Clears audio array
                 audio = [];
                 //Resets values
