@@ -253,8 +253,8 @@
             const springs = [];
             const frictions = [];
             for (var i = 0; i < colors.length; i++) {
-                springs.push(random(0.05, 0.08));
-                frictions.push(random(0.8, 0.95));
+                springs.push(random(0.05, 0.07));
+                frictions.push(random(0.85, 0.95));
             }
 
             //Initializes particles spaced evenly in the circle
