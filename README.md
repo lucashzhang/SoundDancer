@@ -14,4 +14,4 @@ The application also supports customization with the choice to change the backgr
 
 Please note that the usage of Wallpaper Engine is absolutely necessary in order for the scripts to work. The customization and audio listeners are prebuilt from the engine. The trails have been programmed to hide themselves until there is audio.
 
-##Another Reminder that the Wallpaper Engine is required for the usage of this wallpaper
+## Another Reminder that the Wallpaper Engine is required for the usage of this wallpaper
