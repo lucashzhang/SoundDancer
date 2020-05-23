@@ -278,7 +278,7 @@
                 //Returns the location of the melody as an index location
                 getIMax();
 
-                if (melMax < 0.00000001 && intensity < 0.00000001) {
+                if (melMax < 0.00001 || intensity < 0.00000001) {
                     //If melMax and intensity is practically 0;
                     iMax = 0;
                     if (exposed && particles[0].isTrailCentered) {
