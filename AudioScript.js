@@ -242,7 +242,7 @@
                     for (var i = 1; i < length; i++) {
                         let x = this._trails[0].points[i][0] - this._trails[0].points[i - 1][0];
                         let y = this._trails[0].points[i][1] - this._trails[0].points[i - 1][1];
-                        if (Math.sqrt(x * x + y * y) > 0.00044) return false;
+                        if (Math.sqrt(x * x + y * y) > 0.0005) return false;
                     }
                     return true;
                 }
@@ -281,6 +281,7 @@
                 if (melMax < 0.000004 && bassMax < 0.000004) {
                     //If melMax and intensity is practically 0;
                     iMax = 0;
+                    intensity = 0;
                     if (exposed && particles[0].isTrailCentered) {
                         //When the trail becomes small, hide the canvas
                         exposed = false
