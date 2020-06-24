@@ -10,7 +10,7 @@ The wallpaper/web application reacts to any and all audio from the computer, not
 
 The application also supports customization with the choice to change the background as well as add an overlay or center image. It also allows for the ability to add more rotating particles as well as change the lengths and colors of the trails.
 
-![Third Demo](/Demo-Gifs/Heritors-of-Arcadia.gif)
+![Third Demo](/Demo-Gifs/Disappear.gif)
 
 Another important aspect of the application as a wallpaper is that it supports blank colors as well. It does not rely on the placement of elements to hide anything. When the sound is gone, the trails will stop animating and hide themselves by causing the canvas to disappear.
 
