@@ -32,4 +32,6 @@ body {
 #center {
     width: 42vh;
     height: 42vh;
+    object-position: center;
+    border-color: pink;
 }

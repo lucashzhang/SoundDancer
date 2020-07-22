@@ -163,8 +163,8 @@
                 }
                 updateParticle(iMax, intensity) {
                     //Update all fields related to particle
-                    this._arcRadius = window.innerHeight / 256 + Math.round((7 * this._arcRadius + iMax * window.innerHeight / 128) / 8);
-                    this._velocity = flip ? 0.01 + Math.sqrt(intensity) / 48 : -(0.01 + Math.sqrt(intensity) / 48);
+                    this._arcRadius = window.innerHeight / 256 + Math.round((7 * this._arcRadius + iMax * window.innerHeight / 144) / 8);
+                    this._velocity = flip ? 0.01 + Math.sqrt(intensity) / 36 : -(0.01 + Math.sqrt(intensity) / 36);
                     this._radians += this._velocity;
                     //The particle moves in a circular motion
                     this._x = this._originX + this._arcRadius * Math.cos(this._radians);
@@ -197,10 +197,11 @@
                         line.polyline.updateGeometry();
                     });
                 }
-                initTrails(springs, frictions) {
+                initTrails(springs, frictions, offsets) {
                     //Shuffle the springs and frictions so while on entire group shares the same characteristics, the individual lines are different
                     shuffleArray(springs);
                     shuffleArray(frictions);
+                    shuffleArray(offsets);
                     //Init a line for each color
                     this._colors.forEach(
                         (color, i) => {
@@ -209,7 +210,7 @@
                                 spring: springs[i],
                                 friction: frictions[i],
                                 currVelocity: new Vec3(),
-                                currOffset: new Vec3(random(0, 0.05) * 0.005, random(0, 0.05) * 0.005, 0)
+                                currOffset: new Vec3(offsets[i].x, offsets[i].y, 0)
                             };
                             // Creates an array of Vec3s (eg [[0, 0, 0], ...])
                             const points = (line.points = []);
@@ -252,9 +253,11 @@
             //Init a bunch of random springs and frictions to be shared between all particles
             const springs = [];
             const frictions = [];
+            const offsets = [];
             for (var i = 0; i < colors.length; i++) {
                 springs.push(random(0.05, 0.07));
                 frictions.push(random(0.85, 0.95));
+                offsets.push({x: random(0, 0.03), y: random(0, 0.03)})
             }
 
             //Initializes particles spaced evenly in the circle
@@ -262,7 +265,7 @@
             const radIncrement = 2 / numParticles;
             for (var i = 0; i < numParticles; i++) {
                 var newParticle = new Particle(window.innerWidth / 2, window.innerHeight / 2, Math.PI * i * radIncrement, colors);
-                newParticle.initTrails(springs, frictions);
+                newParticle.initTrails(springs, frictions, offsets);
                 newParticle.resizeTrails();
                 window.addEventListener("resize", newParticle.resizeTrails(), false);
                 particles.push(newParticle);
