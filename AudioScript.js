@@ -180,8 +180,11 @@
                     this._trails.forEach(line => {
                         // Update polyline input points
                         for (let i = line.points.length - 1; i >= 0; i--) {
+
                             if (!i) {
                                 // For the first point, spring ease it to the mouse position
+                                line.currOffset[0] = line.offset.x * Math.cos(this._radians);
+                                line.currOffset[1] = line.offset.y * Math.sin(this._radians);
                                 this._tmp
                                     .copy(this._particle)
                                     .add(line.currOffset)
@@ -210,7 +213,8 @@
                                 spring: springs[i],
                                 friction: frictions[i],
                                 currVelocity: new Vec3(),
-                                currOffset: new Vec3(offsets[i].x, offsets[i].y, 0)
+                                currOffset: new Vec3(0, 0, 0),
+                                offset: offsets[i]
                             };
                             // Creates an array of Vec3s (eg [[0, 0, 0], ...])
                             const points = (line.points = []);
